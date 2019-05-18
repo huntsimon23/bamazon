@@ -77,7 +77,7 @@ function makePurchase(res) {
                 }; 
             
         };
-        if (parseInt(answer.choice) > (res.length +1)) {
+        if (parseInt(answer.choice) > res.length || parseInt(answer.choice) <= 0) {
             console.log("- - - - - - - - - - - - - - - - - ");
             console.log("We don't have that game. Try again...");
             console.log("- - - - - - - - - - - - - - - - - ");
