@@ -7,7 +7,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port:3306,
     user: "root",
-    password: "Shalom77&",
+    password: process.env.DBpassword,
     database: "bamazonDB",
 });
 
@@ -27,46 +27,62 @@ function displayItems() {
     });
 };
 
-var makePurchase = function(res) {
+function makePurchase(res) {
     inquirer.prompt([{
         type: "input",
         name: "choice",
-        message: "What item_id would you like to purchase?",
+        message: "What item_id would you like to purchase? (Type 'quit' to quit wasting your money).",
+        validate: function(q) {
+            if (q == "quit") {
+                process.exit();
+            } else if (isNaN(q)==false) {
+                return true;
+            } else {
+                return false;
+            };
+        }
+    }, {
+        type: "input",
+        name: "quantity",
+        message: "How many would you like to buy?",
+        validate: function(val){
+            if(isNaN(val)==false){
+                return true;
+            } else {
+                return false;
+            };
+        },
     }]).then(function(answer){
-        var correct = false;
-        for(i=0; i<res.length; i++) {
-            if(res.product_name == answer.choice) {
-                correct = true;
-                var product = answer.choice;
-                var id = i;
-                inquirer.prompt({
-                    type: "input",
-                    name: "quantity",
-                    message: "How many would you like to buy?",
-                    validate: function(val){
-                        if(isNaN(val)==false){
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                }).then(function(answer){
-                    var inventoryLeft = res[id].stock_quantity-answer.quantity;
+        for(var i = 0; i < res.length; i++) {
+            if(res[i].item_id == answer.choice) {
+                var product = res[i].product_name;
+                var price = res[i].price;
+                var inventoryLeft = res[i].stock_quantity-answer.quantity;
                     if(inventoryLeft > 0) {
                         connection.query("UPDATE products SET stock_quantity='" + inventoryLeft + "' WHERE product_name='" + product + "'", function(error, result){
                             if (error) throw error;
-                            console.log("Congratulations! You purchased hours of repeptitive entertainment!");
+                            console.log("- - - - - - - - - - - - - - - - - ");
+                            console.log("- - - - - - - - - - - - - - - - - ");
+                            console.log("Congratulations! You purchased hours of repeptitive entertainment with " + answer.quantity + " " + product + "'s, for a grand total of $" + answer.quantity*price + ".  Your items are on their way and should be to you soon!  Care to buy again?");
+                            console.log("- - - - - - - - - - - - - - - - - ");
+                            console.log("- - - - - - - - - - - - - - - - - ");
                             displayItems();
-                        })
+                        });
                     } else {
-                        console.log("We don't have that game. Try again...");
-                        makePurchase(res);
-                    }
-                }).catch(function(err) {
-                    if (err) throw err;
-                });
-            }
-        }
+                    console.log("- - - - - - - - - - - - - - - - - ");
+                    console.log("Bamazon does not have sufficient quantity to fulfill this purchase.  Try again...");
+                    console.log("- - - - - - - - - - - - - - - - - ");
+                    makePurchase(res);
+                    }; 
+                }; 
+            
+        };
+        if (parseInt(answer.choice) > (res.length +1)) {
+            console.log("- - - - - - - - - - - - - - - - - ");
+            console.log("We don't have that game. Try again...");
+            console.log("- - - - - - - - - - - - - - - - - ");
+            makePurchase(res);
+        };
     }).catch(function(err){
         if (err) throw err;
     });
