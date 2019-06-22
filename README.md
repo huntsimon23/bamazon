@@ -1,7 +1,7 @@
 # bamazon
 CLI app featuring NODE.js and a local MySQL Server 
 
-images and video of workign app may be found here:
+images and video of working app may be found here:
 https://drive.google.com/open?id=18LkC-sIFKjCOGLqukBKcz8T9WOJRWYne
 
 notes: 
